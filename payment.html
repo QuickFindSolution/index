@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - QuickFind</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .payment-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 50px;
+            max-width: 650px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .payment-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .payment-header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #fff 0%, #667eea 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .payment-header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+        }
+
+        .order-summary {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .order-summary h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .summary-value {
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 500;
+        }
+
+        .total-amount {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 25px 0;
+            text-align: center;
+        }
+
+        .total-amount h2 {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        .method-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .method-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .method-card:hover {
+            border-color: rgba(102, 126, 234, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .method-card.active {
+            border-color: #F3BA2F;
+            background: rgba(243, 186, 47, 0.1);
+            box-shadow: 0 10px 30px rgba(243, 186, 47, 0.3);
+        }
+
+        .method-card h3 {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .method-card p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .method-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .method-box {
+            margin-top: 25px;
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .method-box.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .payment-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .payment-section h4 {
+            color: #F3BA2F;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .address-container {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .address-text {
+            flex: 1;
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            word-break: break-all;
+            line-height: 1.4;
+        }
+
+        .copy-icon {
+            background: rgba(243, 186, 47, 0.2);
+            border: 1px solid rgba(243, 186, 47, 0.3);
+            color: #F3BA2F;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            font-size: 1.2rem;
+        }
+
+        .copy-icon:hover {
+            background: rgba(243, 186, 47, 0.3);
+            transform: scale(1.1);
+        }
+
+        .copy-icon:active {
+            transform: scale(0.95);
+        }
+
+        .copy-message {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            display: none;
+            font-weight: 600;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .copy-message.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: white;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: rgba(243, 186, 47, 0.5);
+            box-shadow: 0 0 15px rgba(243, 186, 47, 0.2);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .form-group select {
+            cursor: pointer;
+        }
+
+        .form-group select option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            width: 100%;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .submit-btn .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        .submit-btn.loading .spinner {
+            display: block;
+        }
+
+        .submit-btn.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .success-screen {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-screen.show {
+            display: block;
+        }
+
+        .success-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .success-screen h2 {
+            color: white;
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .success-screen p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .return-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 35px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .return-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .payment-container {
+                padding: 30px 20px;
+            }
+            .method-cards {
+                grid-template-columns: 1fr;
+            }
+            .payment-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <div id="paymentForm">
+            <div class="payment-header">
+                <h1>Complete Your Payment</h1>
+                <p>Secure and fast payment processing</p>
+            </div>
+
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+                <div class="summary-item">
+                    <span class="summary-label">Order ID:</span>
+                    <span class="summary-value" id="orderId">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Service:</span>
+                    <span class="summary-value" id="serviceType">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Name:</span>
+                    <span class="summary-value" id="customerName">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Email:</span>
+                    <span class="summary-value" id="customerEmail">-</span>
+                </div>
+            </div>
+
+            <div class="total-amount">
+                <h2>$1.99</h2>
+            </div>
+
+            <div class="method-cards">
+                <div class="method-card" id="cardWallet">
+                    <span class="method-icon">💳</span>
+                    <h3>Wallet Address</h3>
+                    <p>Send crypto to our wallet</p>
+                </div>
+                <div class="method-card" id="cardBinance">
+                    <span class="method-icon">🏦</span>
+                    <h3>Binance ID</h3>
+                    <p>Pay via Binance ID</p>
+                </div>
+            </div>
+
+            <div id="walletMethod" class="method-box">
+                <div class="payment-section">
+                    <h4>Wallet Address</h4>
+                    <div class="address-container">
+                        <span class="address-text" id="walletAddress">TYour_Wallet_Address_Here_Example_123456</span>
+                        <div class="copy-icon" onclick="copyToClipboard('walletAddress')" title="Copy address">
+                            📋
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Cryptocurrency</label>
+                    <select id="cryptoType">
+                        <option value="USDT-TRC20">USDT (TRC20)</option>
+                        <option value="USDT-ERC20">USDT (ERC20)</option>
+                        <option value="BTC">Bitcoin</option>
+                        <option value="ETH">Ethereum</option>
+                        <option value="BNB">BNB</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Transaction ID / Hash</label>
+                    <input type="text" id="transactionId" placeholder="Enter your transaction hash">
+                </div>
+            </div>
+
+            <div id="binanceMethod" class="method-box">
+                <div class="payment-section">
+                    <h4>Binance Pay ID</h4>
+                    <div class="address-container">
+                        <span class="address-text" id="binanceIdBox">123456789</span>
+                        <div class="copy-icon" onclick="copyToClipboard('binanceIdBox')" title="Copy Binance ID">
+                            📋
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Transfer Reference ID</label>
+                    <input type="text" id="binanceRef" placeholder="Enter Binance Transfer Reference">
+                </div>
+            </div>
+
+            <button class="submit-btn" id="submitPayment">
+                <span class="btn-text">Confirm Payment</span>
+                <div class="spinner"></div>
+            </button>
+        </div>
+
+        <div id="successScreen" class="success-screen">
+            <div class="success-icon">✅</div>
+            <h2>Payment Submitted!</h2>
+            <p>Your payment has been received and is being verified. You'll receive a confirmation email shortly.</p>
+            <a href="index.html" class="return-btn">Return to Home</a>
+        </div>
+    </div>
+
+    <div id="copyMessage" class="copy-message">Copied! ✓</div>
+
+    <script>
+        const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxOMW_mCbA4sjgQasdMGCIK_ieZE_k_FjKVLLR0DrAbT6_TB364xX3g98jCk_U8-9_lAw/exec';
+        let orderData = null;
+        let selectedMethod = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const stored = sessionStorage.getItem('currentOrder');
+            if (stored) {
+                orderData = JSON.parse(stored);
+                document.getElementById('orderId').textContent = orderData.orderId;
+                document.getElementById('serviceType').textContent = orderData.service_type;
+                document.getElementById('customerName').textContent = orderData.name;
+                document.getElementById('customerEmail').textContent = orderData.email;
+            }
+        });
+
+        const cardWallet = document.getElementById('cardWallet');
+        const cardBinance = document.getElementById('cardBinance');
+        const walletMethod = document.getElementById('walletMethod');
+        const binanceMethod = document.getElementById('binanceMethod');
+
+        cardWallet.onclick = () => {
+            cardWallet.classList.add('active');
+            cardBinance.classList.remove('active');
+            walletMethod.classList.add('active');
+            binanceMethod.classList.remove('active');
+            selectedMethod = "wallet";
+        }
+
+        cardBinance.onclick = () => {
+            cardBinance.classList.add('active');
+            cardWallet.classList.remove('active');
+            binanceMethod.classList.add('active');
+            walletMethod.classList.remove('active');
+            selectedMethod = "binanceId";
+        }
+
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+
+            navigator.clipboard.writeText(text).then(() => {
+                showCopyMessage();
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+
+        function showCopyMessage() {
+            const message = document.getElementById('copyMessage');
+            message.classList.add('show');
+
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, 2000);
+        }
+
+        document.getElementById('submitPayment').onclick = async () => {
+            if (!selectedMethod) {
+                alert("Please select a payment method");
+                return;
+            }
+
+            let record = {};
+
+            if (selectedMethod === "wallet") {
+                const tx = document.getElementById('transactionId').value.trim();
+                if (!tx) {
+                    alert("Please enter transaction hash");
+                    return;
+                }
+                record = {
+                    type: 'payment',
+                    timestamp: new Date().toLocaleString(),
+                    orderId: orderData.orderId,
+                    customerName: orderData.name,
+                    customerEmail: orderData.email,
+                    customerPhone: orderData.phone,
+                    serviceType: orderData.service_type,
+                    amount: '1.99',
+                    paymentMethod: "Wallet - " + document.getElementById('cryptoType').value,
+                    transactionId: tx,
+                    status: "Pending Verification"
+                };
+            } else {
+                const ref = document.getElementById('binanceRef').value.trim();
+                if (!ref) {
+                    alert("Please enter Binance Reference ID");
+                    return;
+                }
+                record = {
+                    type: 'payment',
+                    timestamp: new Date().toLocaleString(),
+                    orderId: orderData.orderId,
+                    customerName: orderData.name,
+                    customerEmail: orderData.email,
+                    customerPhone: orderData.phone,
+                    serviceType: orderData.service_type,
+                    amount: '1.99',
+                    paymentMethod: "Binance ID",
+                    transactionId: ref,
+                    status: "Pending Verification"
+                };
+            }
+
+            const submitBtn = document.getElementById('submitPayment');
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            try {
+                await fetch(GOOGLE_SHEETS_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                    },
+                    body: JSON.stringify(record),
+                    mode: 'no-cors'
+                });
+
+                document.getElementById('paymentForm').style.display = 'none';
+                document.getElementById('successScreen').classList.add('show');
+            } catch (error) {
+                console.error('Error:', error);
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+                alert('Error submitting payment. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>
